@@ -1,6 +1,3 @@
--- PROCEDURE: public.transfer_money(bigint, bigint, numeric)
-
--- DROP PROCEDURE IF EXISTS public.transfer_money(bigint, bigint, numeric);
 
 CREATE OR REPLACE PROCEDURE public.transfer_money(
 	IN id_from bigint,
@@ -37,5 +34,3 @@ BEGIN
 
 END;
 $BODY$;
-ALTER PROCEDURE public.transfer_money(bigint, bigint, bigint)
-    OWNER TO postgres;

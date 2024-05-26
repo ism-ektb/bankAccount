@@ -13,7 +13,7 @@ import org.hibernate.annotations.Check;
 @Setter
 @SuperBuilder
 @EqualsAndHashCode
-@Check(constraints = "balance > 0 AND count < 16")
+@Check(constraints = "balance >= 0 AND count < 16")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

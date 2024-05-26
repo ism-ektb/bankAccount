@@ -4,9 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.security.web.csrf.InvalidCsrfTokenException;
@@ -96,6 +100,20 @@ public class ErrorHandler {
 
         return new ErrorResponse(List.of(new Error("Ошибка авторизации, неверный логин " +
                 "или пароль", e.getMessage())));
+    }
+
+    @ExceptionHandler(JpaSystemException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse onJpaSystemException(JpaSystemException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(List.of(new Error("Incorrectly made request.", e.getMessage())));
+    }
+
+    @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse onInvalidDataAccessResourceUsageException(InvalidDataAccessResourceUsageException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(List.of(new Error("Incorrectly made request.", e.getMessage())));
     }
 
 

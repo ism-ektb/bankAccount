@@ -1,7 +1,3 @@
---PROCEDURE: public.add_percent()
-
---DROP PROCEDURE IF EXISTS public.add_percent();
-
 CREATE OR REPLACE PROCEDURE public.add_percent(
 )
     LANGUAGE 'plpgsql'
@@ -11,8 +7,6 @@ DECLARE
     amount_record RECORD;
 
 BEGIN
-    -- Ваш код здесь
-    -- Например, выполнение каких-либо операций с параметром
     LOCK TABLE accounts IN SHARE MODE;
     FOR amount_record IN SELECT balance, count, id FROM accounts
         LOOP
@@ -34,5 +28,3 @@ BEGIN
 
 END;
 $BODY$;
-ALTER PROCEDURE public.add_percent()
-    OWNER TO postgres;

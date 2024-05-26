@@ -28,14 +28,14 @@ class UserServiceTest {
      * Тест демонтстрирует потокобезопасность перевода. Не все переводы при высокой нагрузке
      * проходят, но деньги не теряются и не начисляются лишние средства
      *
-     * для работоспособности теста в базе должет быть клиент с id 5 (отправитель) и
+     * для работоспособности теста в базе должет быть клиент с id 1 (отправитель) и
      * клиент с логином "Jonson2".
      */
     @Test
     @SneakyThrows
-    public void transfer() {
+    public void multiTreadTransfer() {
 
-        Account account1 = repository.findAccountByUserId(5L).orElseThrow(() -> new RuntimeException());
+        Account account1 = repository.findAccountByUserId(1L).orElseThrow(() -> new RuntimeException());
         Account account2 = repository.findAccountByUserUsername("Jonson2").orElseThrow(() -> new RuntimeException());
 
         long startBalance = account1.getBalance() + account2.getBalance();
@@ -53,7 +53,7 @@ class UserServiceTest {
 
         //проверяем, не потерялись ли деньги из-за отмены транзакций
 
-        Account account12 = repository.findAccountByUserId(5L).orElseThrow(() -> new RuntimeException());
+        Account account12 = repository.findAccountByUserId(1L).orElseThrow(() -> new RuntimeException());
         Account account22 = repository.findAccountByUserUsername("Jonson2").orElseThrow(() -> new RuntimeException());
 
         long finishBalance = account12.getBalance() + account22.getBalance();
@@ -79,7 +79,7 @@ class Transfer1 implements Runnable {
 
     @Override
     public void run() {
-        Long balance = service.transfer(User.builder().id(5L).build(), "Jonson2", 15L);
+        Long balance = service.transfer(User.builder().id(1L).build(), "Jonson2", 15L);
         log.info("Остаток на счете {}", balance);
     }
 

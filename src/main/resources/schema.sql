@@ -1,94 +1,32 @@
-CREATE TABLE IF NOT EXISTS users
-(
-    id        BIGINT GENERATED ALWAYS as IDENTITY PRIMARY KEY,
-    password  VARCHAR(255),
-    firstname VARCHAR(255),
-    lastname  VARCHAR(255),
-    username  VARCHAR(255),
-    birthday  DATE,
-    phone     VARCHAR(255),
-    email     VARCHAR(255),
-    role      varchar(255),
-    CONSTRAINT uq_email UNIQUE (email),
-    CONSTRAINT uq_phone UNIQUE (phone)
+alter table if exists accounts
+    drop constraint if exists FKnjuop33mo69pd79ctplkck40n;
+drop table if exists accounts cascade;
+drop table if exists users cascade;
+drop sequence if exists user_id_seq;
+create sequence user_id_seq start with 1 increment by 1;
+create table accounts (
+                          balance bigint not null,
+                          count bigint not null,
+                          id bigserial not null,
+                          user_id bigint unique,
+                          primary key (id),
+                          check (balance >= 0 AND count < 16)
 );
-
-CREATE TABLE IF NOT EXISTS accounts
-(
-    id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT,
-    balance BIGINT,
-    count BIGINT,
-    CONSTRAINT user_qu UNIQUE (user_id),
-    CONSTRAINT no_null CHECK ( balance > 0 ),
-    CONSTRAINT max_percent CHECK ( count < 16 )
+create table users (
+                       birthday date not null,
+                       id bigint not null,
+                       email varchar(255) unique,
+                       firstname varchar(255) not null,
+                       lastname varchar(255) not null,
+                       password varchar(255) not null,
+                       phone varchar(255) unique,
+                       role varchar(255) not null check (role in ('ROLE_USER','ROLE_ADMIN')),
+                       username varchar(255) not null unique,
+                       primary key (id)
 );
-
-CREATE OR REPLACE PROCEDURE public.transfer_money(
-    IN id_from bigint,
-    IN id_to bigint,
-    IN amount_transfer bigint)
-    LANGUAGE 'plpgsql'
-AS $BODY$
-DECLARE
-    amount_from record;
-    amount_to record;
-
-BEGIN
-
-    LOCK TABLE accounts IN SHARE MODE;
-    select balance into amount_from from accounts where user_id = id_from;
-    select balance into amount_to from accounts where user_id = id_to;
+alter table if exists accounts
+    add constraint FKnjuop33mo69pd79ctplkck40n
+        foreign key (user_id)
+            references users;
 
 
-    IF amount_from.balance < amount_transfer THEN
-        RAISE EXCEPTION 'amount_from меньше amount_to';
-    else
-        amount_from.balance := amount_from.balance - amount_transfer;
-        amount_to.balance := amount_to.balance + amount_transfer;
-    END IF;
-
-    update accounts
-    set balance = amount_from.balance
-    where user_id = id_from;
-
-    update accounts
-    set balance = amount_to.balance
-    where user_id = id_to;
-
-
-END;
-$BODY$;
-
-CREATE OR REPLACE PROCEDURE public.add_percent(
-)
-    LANGUAGE 'plpgsql'
-AS
-$BODY$
-DECLARE
-    amount_record RECORD;
-
-BEGIN
-    -- Ваш код здесь
-    -- Например, выполнение каких-либо операций с параметром
-    LOCK TABLE accounts IN SHARE MODE;
-    FOR amount_record IN SELECT balance, count, id FROM accounts
-        LOOP
-            if amount_record.count >= 15 then
-                RAISE NOTICE 'максимальный процент достигнут';
-            else
-                amount_record.balance := amount_record.balance * 1.05;
-                amount_record.count := amount_record.count + 1;
-            end if;
-            update accounts
-            set balance = amount_record.balance
-            where id = amount_record.id;
-
-            update accounts
-            set count = amount_record.count
-            where id = amount_record.id;
-
-        END LOOP;
-
-END;
-$BODY$;

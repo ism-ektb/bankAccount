@@ -1,0 +1,551 @@
+{
+	"info": {
+		"_postman_id": "9dd2e8a2-2b36-4c35-8e40-da7f275476da",
+		"name": "Тест переводов",
+		"description": "Тест запускается после теста Main service.\n\nПеред повторным запуском необходимо перезагрузить программу",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "33375206"
+	},
+	"item": [
+		{
+			"name": "Регистрация User 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"});\r",
+							"if (responseCode.code === 200) {\r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"\r",
+							"  postman.setEnvironmentVariable(\"authHeader1\", jsonData.token);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \r\n\"firstname\": \"Jonson1\",\r\n\"lastname\": \"Петров1\",\r\n\"username\": \"Jonson1\",\r\n\"birthday\": \"2004-05-21\",\r\n\"email\": \"jondoe@gmail.com1\",\r\n\"phone\": \"+79500000001\",\r\n\"password\": \"password\",\r\n\"balance\": 1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/auth/sign-up"
+			},
+			"response": []
+		},
+		{
+			"name": "Получение информации о User 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.be.ok;    \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response must contains body in json format\", function () {   \r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader1}}"
+					}
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/user"
+			},
+			"response": []
+		},
+		{
+			"name": "Регистрация User 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.be.ok;    \r",
+							"});\r",
+							"\r",
+							"if (responseCode.code === 200) {\r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"\r",
+							"  postman.setEnvironmentVariable(\"authHeader2\", jsonData.token);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \r\n\"firstname\": \"Jonson2\",\r\n\"lastname\": \"Петров2\",\r\n\"username\": \"Jonson2\",\r\n\"birthday\": \"2004-05-22\",\r\n\"email\": \"jondoe@gmail.com2\",\r\n\"phone\": \"+79500000002\",\r\n\"password\": \"password\",\r\n\"balance\": 1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/auth/sign-up"
+			},
+			"response": []
+		},
+		{
+			"name": "Перевод от User 1 к User 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.be.ok;    \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Баланс отправителя уменьшился на 10\", function () { \r",
+							"     \r",
+							"    pm.expect(responseBody).equals('990');\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader1}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/transfer?recipient=Jonson2&sum=10",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"transfer"
+					],
+					"query": [
+						{
+							"key": "recipient",
+							"value": "Jonson2"
+						},
+						{
+							"key": "sum",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Проверяем зачисление средств User 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.have.status(200);   \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Счет User2 увеличился\", function () {   \r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"    pm.expect(jsonData.balance).equal(1010);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader2}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/user"
+			},
+			"response": []
+		},
+		{
+			"name": "Попытка перевода отрицательной суммы",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 400\", function () {\r",
+							"    pm.response.to.be.badRequest;   \r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader1}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"test\",\r\n    \"text\": \"Test comment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/transfer?recipient=Jonson2&sum=-10",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"transfer"
+					],
+					"query": [
+						{
+							"key": "recipient",
+							"value": "Jonson2"
+						},
+						{
+							"key": "sum",
+							"value": "-10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Попытка перевода суммы превышающей баланс",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 409\", function () {\r",
+							"    pm.response.to.have.status(409);   \r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader1}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"test\",\r\n    \"text\": \"Test comment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/transfer?recipient=Jonson2&sum=10000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"transfer"
+					],
+					"query": [
+						{
+							"key": "recipient",
+							"value": "Jonson2"
+						},
+						{
+							"key": "sum",
+							"value": "10000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Баланс User2 после ошибочных переводов не изменился",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.have.status(200);   \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Счет User2 увеличился\", function () {   \r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"    pm.expect(jsonData.balance).equal(1010);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader2}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{baseUrl}}/user"
+			},
+			"response": []
+		},
+		{
+			"name": "Баланс User1 после ошибочных переводов не изменился",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status must be 200\", function () {\r",
+							"    pm.response.to.have.status(200);   \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Счет User1 не изменился\", function () {   \r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"    pm.expect(jsonData.balance).equal(990);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{authHeader1}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{baseUrl}}/user"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

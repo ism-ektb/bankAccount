@@ -11,6 +11,7 @@ import ru.ism.testBank.domain.dto.UserPatchDto;
 import ru.ism.testBank.domain.model.Account;
 import ru.ism.testBank.domain.model.User;
 import ru.ism.testBank.exception.exception.BaseRelationshipException;
+import ru.ism.testBank.exception.exception.NoFoundObjectException;
 import ru.ism.testBank.repository.AccountRepository;
 import ru.ism.testBank.repository.UserRepository;
 
@@ -42,11 +43,11 @@ public class UserService {
     public User create(User user, Long balance) {
         if (repository.existsByUsername(user.getUsername())) {
             // Заменить на свои исключения
-            throw new RuntimeException("Пользователь с таким именем уже существует");
+            throw new BaseRelationshipException("Пользователь с таким именем уже существует");
         }
 
         if (repository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Пользователь с таким email уже существует");
+            throw new BaseRelationshipException("Пользователь с таким email уже существует");
         }
 
         User saveUser = save(user);
@@ -128,16 +129,42 @@ public class UserService {
         return repository.save(user);
     }
 
-    
+    /**
+     * Метод поиска информации о пользователе
+     * @param birthday в выборке будут учавствовать пользователи с датой рождения больше указанной
+     * @param phone В выборке будут учавствовать пользоватери с указанным номером
+     * @param firstname В выборке будут учавствовать пользователи имя которых содержит указанный текст
+     * @param lastname В выборке будут учавствовать пользователи фамилия которых содержит указанный текст
+     * @param email
+     * @param pageRequest
+     * @return возвращается список пользователей
+     */
     public List<User> getAllUsers(LocalDate birthday, String phone, String firstname,
                                   String lastname, String email, PageRequest pageRequest) {
         return repository.findByManyParam(lastname, firstname, email, birthday, phone, pageRequest);
     }
 
+    /**
+     * Метод перевода денежных средств
+     * @param user Инициатор перево
+     * @param recipientLogin Логин получателя перерода
+     * @param sum сумма перевода
+     * @return Баланс счета инициатора перевода
+     */
     public Long transfer(User user, String recipientLogin, Long sum) {
         User recipient = getByUsername(recipientLogin);
         accountRepository.transferMoney(user.getId(), recipient.getId(), sum);
         Account account = accountRepository.findAccountByUserId(user.getId()).orElseThrow(() -> new RuntimeException());
         return account.getBalance();
+    }
+
+    /**
+     * получение счета пользователя из контекста
+     * @return
+     */
+    public Account getAccountFromContext(){
+        User user = getCurrentUser();
+        return accountRepository.findAccountByUserId(user.getId())
+                .orElseThrow(()->new NoFoundObjectException("Ошибка в получении счета из коетекста"));
     }
 }

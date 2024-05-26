@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.ism.testBank.domain.dto.AccountOutDto;
 import ru.ism.testBank.domain.dto.UserDto;
 import ru.ism.testBank.domain.dto.UserPatchDto;
+import ru.ism.testBank.domain.mapper.AccountMapper;
 import ru.ism.testBank.domain.mapper.UserListMapper;
 import ru.ism.testBank.domain.mapper.UserMapper;
 import ru.ism.testBank.domain.model.User;
@@ -29,11 +31,12 @@ public class UserController {
     private final UserService service;
     private final UserMapper mapper;
     private final UserListMapper listMapper;
+    private final AccountMapper accountMapper;
 
     @GetMapping
     @Operation(summary = "Информация о текущем пользователе")
-    public UserDto getInfo() {
-        return mapper.modelToDto(service.getCurrentUser());
+    public AccountOutDto getInfo() {
+        return accountMapper.modelToDto(service.getAccountFromContext());
     }
 
     @PatchMapping
