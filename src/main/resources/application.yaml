@@ -1,7 +1,9 @@
 spring:
   application:
     name: test bank
-
+  sql:
+    init:
+      mode: never
   datasource:
     url: jdbc:postgresql://localhost:5432/account?createDatabaseIfNotExist=true
     driverClassName: org.postgresql.Driver
@@ -16,7 +18,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
+
     generate-ddl: true
 token:
   signing:

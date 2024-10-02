@@ -77,6 +77,8 @@ public class UserController {
     public Long transfer(@RequestParam String recipient,
                          @RequestParam @Positive Long sum){
         User user = service.getCurrentUser();
-        return service.transfer(user, recipient, sum);
+        Long newBalance = service.transfer(user, recipient, sum);
+        log.info("успешный перевод на суммы {} от {} к {}", sum, user.getUsername(), recipient);
+        return newBalance;
     }
 }

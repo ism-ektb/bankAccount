@@ -3,10 +3,15 @@ package ru.ism.testBank.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ism.testBank.domain.dto.UserPatchDto;
 import ru.ism.testBank.domain.model.Account;
 import ru.ism.testBank.domain.model.User;
@@ -24,6 +29,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository repository;
     private final AccountRepository accountRepository;
+
 
     /**
      * Сохранение пользователя
@@ -151,11 +157,19 @@ public class UserService {
      * @param sum сумма перевода
      * @return Баланс счета инициатора перевода
      */
-    public Long transfer(User user, String recipientLogin, Long sum) {
-        User recipient = getByUsername(recipientLogin);
-        accountRepository.transferMoney(user.getId(), recipient.getId(), sum);
-        Account account = accountRepository.findAccountByUserId(user.getId()).orElseThrow(() -> new RuntimeException());
-        return account.getBalance();
+     @Transactional(isolation = Isolation.REPEATABLE_READ)
+     @Retryable
+     public Long transfer(User user, String recipientLogin, Long sum) {
+
+        Account recipientAccount = accountRepository.findAccountByUserUsername(recipientLogin)
+                .orElseThrow(() -> new NoFoundObjectException("Не найден счет у получателя средств"));
+        Account userAccount = accountRepository.findAccountByUserId(user.getId()).get();
+        if (userAccount.getBalance() < sum) new BaseRelationshipException("На счете недостаточно средств");
+        userAccount.setBalance(userAccount.getBalance() - sum);
+        accountRepository.save(userAccount);
+        recipientAccount.setBalance(recipientAccount.getBalance() + sum);
+        accountRepository.save(recipientAccount);
+        return userAccount.getBalance();
     }
 
     /**
@@ -166,5 +180,19 @@ public class UserService {
         User user = getCurrentUser();
         return accountRepository.findAccountByUserId(user.getId())
                 .orElseThrow(()->new NoFoundObjectException("Ошибка в получении счета из коетекста"));
+    }
+
+    /**
+     * начисление процентов на по каждому счету
+     * параметр fixedDelay изменяет период начисления процентов
+     */
+    @Scheduled(fixedDelay = 10000)
+    @Retryable
+    public void addPercent(){
+
+        AddPercent addPercent = new AddPercent(accountRepository);
+        Thread thread = new Thread(addPercent);
+        thread.start();
+
     }
 }

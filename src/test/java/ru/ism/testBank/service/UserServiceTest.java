@@ -1,9 +1,7 @@
 package ru.ism.testBank.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +37,7 @@ class UserServiceTest {
         Account account2 = repository.findAccountByUserUsername("Jonson2").orElseThrow(() -> new RuntimeException());
 
         long startBalance = account1.getBalance() + account2.getBalance();
+        long startCount = account1.getCount();
 
         for (int i = 0; i < 10; i++) {
             Transfer1 transfer1 = new Transfer1(service);
@@ -56,7 +55,9 @@ class UserServiceTest {
         Account account12 = repository.findAccountByUserId(1L).orElseThrow(() -> new RuntimeException());
         Account account22 = repository.findAccountByUserUsername("Jonson2").orElseThrow(() -> new RuntimeException());
 
+        long finishCount = account22.getCount();
         long finishBalance = account12.getBalance() + account22.getBalance();
+        startBalance *= Math.pow(1.05, (finishCount - startCount));
 
         assertEquals(startBalance, finishBalance);
 
@@ -79,11 +80,8 @@ class Transfer1 implements Runnable {
 
     @Override
     public void run() {
-        Long balance = service.transfer(User.builder().id(1L).build(), "Jonson2", 15L);
+        Long balance = service.transfer(User.builder().id(1L).build(), "Jonson2", 10L);
         log.info("Остаток на счете {}", balance);
     }
-
-
-
 }
 

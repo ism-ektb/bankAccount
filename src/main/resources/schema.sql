@@ -1,5 +1,3 @@
-alter table if exists accounts
-    drop constraint if exists FKnjuop33mo69pd79ctplkck40n;
 drop table if exists accounts cascade;
 drop table if exists users cascade;
 drop sequence if exists user_id_seq;
@@ -24,9 +22,5 @@ create table users (
                        username varchar(255) not null unique,
                        primary key (id)
 );
-alter table if exists accounts
-    add constraint FKnjuop33mo69pd79ctplkck40n
-        foreign key (user_id)
-            references users;
 
 
